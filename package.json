@@ -1,0 +1,6 @@
+{
+  "name": "carbon-calc",
+  "version": "1.0.0",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^5.0.0", "pg": "^8.11.0", "dotenv": "^16.0.0" }
+}
