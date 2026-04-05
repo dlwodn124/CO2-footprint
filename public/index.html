@@ -3,44 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지구 지킴이 탄소 계산기</title>
+    <title>지구 지킴이 탄소 가이드</title>
     <style>
-        body { font-family: 'Apple SD Gothic Neo', sans-serif; background: #f0fdf4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 90%; max-width: 400px; }
-        h1 { color: #166534; font-size: 1.5rem; text-align: center; }
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; background: #f0fdf4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; }
+        
+        /* 탭 스타일 */
+        .tabs { display: flex; margin-bottom: 2rem; border-bottom: 2px solid #dcfce7; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-size: 1rem; color: #888; font-weight: bold; }
+        .tab-btn.active { color: #166534; border-bottom: 3px solid #22c55e; }
+        
+        .content { display: none; }
+        .content.active { display: block; }
+
+        h1 { color: #166534; font-size: 1.5rem; text-align: center; margin-top: 0; }
         .form-group { margin-bottom: 1rem; }
         label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
         select, input { width: 100%; padding: 0.8rem; border: 1px solid #dcfce7; border-radius: 10px; box-sizing: border-box; }
         button { width: 100%; padding: 1rem; background: #22c55e; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; }
+        
         #result { margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 10px; display: none; text-align: center; }
         .carbon-num { font-size: 2rem; color: #15803d; font-weight: 800; }
+
+        /* 가이드 페이지 스타일 */
+        .guide-item { background: #f0fdf4; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #22c55e; }
+        .guide-item h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #15803d; }
+        .guide-item p { margin: 0; font-size: 0.9rem; color: #444; line-height: 1.4; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌱 탄소 발자국 계산기</h1>
-        <div class="form-group">
-            <label>교통수단</label>
-            <select id="activity">
-                <option value="0.21">승용차 (휘발유)</option>
-                <option value="0.06">버스</option>
-                <option value="0.01">지하철</option>
-            </select>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('calc')">탄소 계산기</button>
+            <button class="tab-btn" onclick="openTab('guide')">실천 가이드</button>
         </div>
-        <div class="form-group">
-            <label>이동 거리 (km)</label>
-            <input type="number" id="distance" placeholder="예: 15">
-        </div>
-        <button onclick="calculate()">계산 및 기록하기</button>
 
-        <div id="result">
-            <p>오늘 배출한 탄소량</p>
-            <div class="carbon-num"><span id="val">0</span> kg</div>
-            <p id="msg" style="font-size: 0.9rem; color: #666;"></p>
+        <div id="calc" class="content active">
+            <h1>🌱 탄소 발자국 계산</h1>
+            <div class="form-group">
+                <label>교통수단</label>
+                <select id="activity">
+                    <option value="0.21">승용차 (휘발유)</option>
+                    <option value="0.06">버스</option>
+                    <option value="0.01">지하철</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>이동 거리 (km)</label>
+                <input type="number" id="distance" placeholder="예: 15">
+            </div>
+            <button onclick="calculate()">계산 및 기록하기</button>
+
+            <div id="result">
+                <p>오늘 배출한 탄소량</p>
+                <div class="carbon-num"><span id="val">0</span> kg</div>
+                <p id="msg" style="font-size: 0.9rem; color: #666;"></p>
+            </div>
+        </div>
+
+        <div id="guide" class="content">
+            <h1>🌍 탄소 줄이기 실천법</h1>
+            <div class="guide-item">
+                <h3>🚲 가까운 거리는 걷기/자전거</h3>
+                <p>자동차 대신 자전거를 타면 탄소 배출이 0이 됩니다.</p>
+            </div>
+            <div class="guide-item">
+                <h3>🔌 안 쓰는 플러그 뽑기</h3>
+                <p>대기 전력만 줄여도 연간 상당량의 탄소를 줄일 수 있습니다.</p>
+            </div>
+            <div class="guide-item">
+                <h3>🥩 육류 섭취 줄이기</h3>
+                <p>일주일에 하루만 채식을 해도 나무 15그루를 심는 효과가 있습니다.</p>
+            </div>
+            <div class="guide-item">
+                <h3>🌡️ 적정 실내 온도 유지</h3>
+                <p>여름엔 26도 이상, 겨울엔 20도 이하를 유지해 보세요.</p>
+            </div>
+            <button onclick="openTab('calc')">나의 탄소량 계산하러 가기</button>
         </div>
     </div>
 
     <script>
+        // 탭 전환 함수
+        function openTab(tabName) {
+            const contents = document.querySelectorAll('.content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            contents.forEach(c => c.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // 계산 함수
         async function calculate() {
             const factor = document.getElementById('activity').value;
             const dist = document.getElementById('distance').value;
@@ -51,9 +107,8 @@
             document.getElementById('result').style.display = 'block';
             document.getElementById('msg').innerText = `소나무 ${(carbon / 0.02).toFixed(1)}그루가 하루 종일 흡수해야 하는 양입니다.`;
 
-            // Render 서버를 통해 Neon DB로 전송
             try {
-                const response = await fetch('/api/save', {
+                await fetch('/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -62,10 +117,7 @@
                         carbon: carbon
                     })
                 });
-                if(response.ok) console.log("DB 저장 성공");
-            } catch (e) {
-                console.error("저장 실패", e);
-            }
+            } catch (e) { console.error("DB 저장 실패", e); }
         }
     </script>
 </body>
