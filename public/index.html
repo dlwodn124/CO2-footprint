@@ -1,64 +1,99 @@
-<style>
-    /* 추가된 스타일 */
-    .log-list { margin-top: 20px; text-align: left; max-height: 300px; overflow-y: auto; }
-    .log-item { background: #f9fafb; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; }
-    .log-info { font-size: 0.9rem; }
-    .del-btn { width: auto; padding: 5px 10px; background: #ef4444; margin-top: 0; font-size: 0.8rem; }
-</style>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>탄소 중립 프로젝트</title>
+    <style>
+        :root { --main-color: #22c55e; --bg-color: #f0fdf4; }
+        body { font-family: 'Apple SD Gothic Neo', sans-serif; background: var(--bg-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .container { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
+        .page { display: none; }
+        .page.active { display: block; }
+        h1 { color: #166534; margin-bottom: 1.5rem; }
+        button { width: 100%; padding: 1rem; background: var(--main-color); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input, select { width: 100%; padding: 0.8rem; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .log-item { background: #f8fafc; padding: 12px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; border: 1px solid #e2e8f0; }
+        .del-btn { width: auto; background: #ef4444; padding: 5px 10px; font-size: 0.8rem; margin: 0; }
+        .result-box { background: #dcfce7; padding: 1.5rem; border-radius: 15px; margin-bottom: 1.5rem; font-size: 1.2rem; font-weight: bold; color: #15803d; }
+    </style>
+</head>
+<body>
 
-<div id="page3" class="page">
-    <h1>🌍 실천 가이드</h1>
-    <div class="result-badge">오늘의 배출량: <span id="carbon-res">0</span>kg</div>
-    
-    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-    <h3>📊 나의 기록 히스토리</h3>
-    <button onclick="loadLogs()" style="background: #3b82f6; margin-bottom: 15px;">내 기록 불러오기</button>
-    <div id="log-container" class="log-list">
+    <div class="container">
+        <div id="page1" class="page active">
+            <h1>🌱 탄소 발자국<br>기록하기</h1>
+            <p>나의 일상 속 탄소 배출량을 확인하고 지구를 지키는 실천을 시작해보세요.</p>
+            <button onclick="showPage(2)">계산하러 가기</button>
         </div>
 
-    <button onclick="nextPage(1)" style="background: #6b7280; margin-top: 1rem;">처음으로 돌아가기</button>
-</div>
+        <div id="page2" class="page">
+            <h1>📊 배출량 계산</h1>
+            <select id="activity">
+                <option value="0.21">승용차 (휘발유)</option>
+                <option value="0.06">버스</option>
+                <option value="0.01">지하철</option>
+            </select>
+            <input type="number" id="distance" placeholder="이동 거리 (km)">
+            <button onclick="calculateAndSave()">결과 확인 및 저장</button>
+        </div>
 
-<script>
-    // ... 기존 nextPage, calculateAndGo 함수 유지 ...
+        <div id="page3" class="page">
+            <h1>🌍 실천 가이드</h1>
+            <div class="result-box">배출량: <span id="current-res">0</span>kg</div>
+            <p>💡 2km 이내는 도보나 자전거를 이용하세요!</p>
+            
+            <hr>
+            <h3>📋 나의 활동 기록</h3>
+            <div id="log-list"></div>
+            <button onclick="showPage(1)" style="background:#64748b">홈으로 돌아가기</button>
+        </div>
+    </div>
 
-    // 기록 불러오기 함수
-    async function loadLogs() {
-        try {
-            const response = await fetch('/api/logs');
-            const logs = await response.json();
-            const container = document.getElementById('log-container');
-            container.innerHTML = ''; // 초기화
+    <script>
+        function showPage(num) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page' + num).classList.add('active');
+            if(num === 3) fetchLogs();
+        }
 
-            logs.forEach(log => {
-                const date = new Date(log.created_at).toLocaleDateString();
-                container.innerHTML += `
-                    <div class="log-item">
-                        <div class="log-info">
-                            <strong>${log.activity}</strong> (${log.distance}km)<br>
-                            <small>${date} - ${log.carbon_kg}kg</small>
-                        </div>
-                        <button class="del-btn" onclick="deleteLog(${log.id})">삭제</button>
-                    </div>
-                `;
+        async function calculateAndSave() {
+            const factor = document.getElementById('activity').value;
+            const dist = document.getElementById('distance').value;
+            if(!dist) return alert("거리를 입력해주세요!");
+
+            const carbon = (factor * dist).toFixed(2);
+            document.getElementById('current-res').innerText = carbon;
+
+            await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    activity: document.getElementById('activity').selectedOptions[0].text,
+                    distance: dist,
+                    carbon: carbon
+                })
             });
-        } catch (e) {
-            alert("기록을 불러오는데 실패했습니다.");
+            showPage(3);
         }
-    }
 
-    // 기록 삭제 함수
-    async function deleteLog(id) {
-        if(!confirm("정말 이 기록을 삭제하시겠습니까?")) return;
-
-        try {
-            const response = await fetch(`/api/logs/${id}`, { method: 'DELETE' });
-            if(response.ok) {
-                alert("삭제되었습니다.");
-                loadLogs(); // 목록 새로고침
-            }
-        } catch (e) {
-            alert("삭제에 실패했습니다.");
+        async function fetchLogs() {
+            const res = await fetch('/api/logs');
+            const data = await res.json();
+            const list = document.getElementById('log-list');
+            list.innerHTML = data.map(log => `
+                <div class="log-item">
+                    <span>${log.activity} (${log.carbon_kg}kg)</span>
+                    <button class="del-btn" onclick="deleteLog(${log.id})">삭제</button>
+                </div>
+            `).join('');
         }
-    }
-</script>
+
+        async function deleteLog(id) {
+            if(!confirm("삭제할까요?")) return;
+            await fetch(`/api/logs/${id}`, { method: 'DELETE' });
+            fetchLogs();
+        }
+    </script>
+</body>
+</html>
